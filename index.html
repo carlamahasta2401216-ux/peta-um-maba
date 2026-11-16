@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Land of Cakrawala: UM Maps Navigator (MLBB Edition) - Sobri Si Kodri</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>">
+
+  <!-- Google Fonts: Rajdhani & Cinzel for Gaming Aesthetic -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Custom Game & Denah Maps Style -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ========================================================================
+       1. TOP GAME HUD (PROFIL SOBRI SI KODRI, NIM 24012145566, SEARCH, GPS)
+       ======================================================================== -->
+  <header class="top-hud">
+    <!-- Hero / Student Profile: Sobri Si Kodri & NIM 24012145566 -->
+    <div class="hero-profile" title="Profil Mahasiswa UM">
+      <div class="avatar-wrapper">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Avatar Sobri" class="avatar-img">
+        <div class="hero-level-badge" id="player-level" title="Tingkat Semester">1</div>
+      </div>
+      <div class="hero-info">
+        <div class="hero-name-row">
+          <span class="hero-student-name">Sobri Si Kodri</span>
+          <span class="hero-role-tag">MABA UM</span>
+        </div>
+        <div class="hero-nim-row">
+          <span class="hero-nim-label">NIM</span>
+          <span class="hero-nim-val">24012145566</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center HUD: Search Bar & Match Scoreboard -->
+    <div class="center-hud">
+      <div class="search-wrapper">
+        <div class="search-input-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" class="search-input" placeholder="Cari gedung (FIP, FT, FS, FEB, FMIPA, GKB, Rektorat)..." autocomplete="off">
+          <button id="search-clear" class="search-clear-btn" title="Hapus pencarian">✕</button>
+        </div>
+        <!-- Dropdown Hasil Pencarian -->
+        <div id="search-results" class="search-results-panel"></div>
+      </div>
+
+      <!-- Match Scoreboard / Game Stats Banner -->
+      <div class="match-score-pill">
+        <div class="score-item score-gold">
+          <span>💰</span> <span id="score-gold">1.500 UKT</span>
+        </div>
+        <div class="score-item score-kda">
+          <span>⚡ 22 SKS</span> • <span>K: 12</span> <span>D: 0</span> <span>A: 4</span>
+        </div>
+        <div class="score-item score-time" id="game-clock">
+          ⏱️ 07:15 WIB
+        </div>
+      </div>
+    </div>
+
+    <!-- Right HUD: Google GPS Tracker, Audio Toggle, Denah Modal, Quest Log -->
+    <div class="right-hud-actions">
+      <button class="hud-btn" id="btn-toggle-gps" title="Hubungkan Google GPS Pendeteksi Lokasi Real-Time">🛰️</button>
+      <button class="hud-btn" id="btn-toggle-sound" title="Toggle Sound FX">🔊</button>
+      <button class="hud-btn" id="btn-open-denah" title="Lihat Denah Asli Resolusi Penuh">🗺️</button>
+      <button class="hud-btn" id="btn-open-quests" title="Buka Daftar Misi Maba">
+        📜
+        <div class="badge-dot"></div>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       2. MINIMAP RADAR HUD (TOP-RIGHT CORNER - MLBB STYLE)
+       ======================================================================== -->
+  <aside class="minimap-container" aria-label="Radar Kampus UM">
+    <div class="minimap-header">
+      <span>📡 Radar Cakrawala</span>
+      <span style="color: var(--ml-blue-neon);">ONLINE</span>
+    </div>
+    <div class="minimap-radar-screen" id="radar-screen">
+      <div class="radar-dark-overlay"></div>
+      <div class="radar-grid"></div>
+      <div class="radar-sweep"></div>
+      <div class="radar-camera-box" id="radar-camera-box"></div>
+      <!-- Lane Guides -->
+      <span class="lane-label lane-top">TOP: FT/FMIPA</span>
+      <span class="lane-label lane-mid">MID: GKB/REKTORAT</span>
+      <span class="lane-label lane-bot">BOT: FIP/FEB</span>
+    </div>
+    <div class="minimap-footer">
+      <button class="mini-action-btn" onclick="window.app.quickFindAndRoute('rektorat', 'Menuju Graha Rektorat')">Rektorat</button>
+      <button class="mini-action-btn" onclick="window.app.quickFindAndRoute('gkb_a19', 'Menuju Gedung GKB A19')">GKB A19</button>
+      <button class="mini-action-btn" onclick="window.app.quickFindAndRoute('graca', 'Menuju Graha Cakrawala')">Graca</button>
+    </div>
+  </aside>
+
+  <!-- ========================================================================
+       3. NAVIGATION BANNER (TOP-LEFT / AUTO-ROUTING ACTIVE)
+       ======================================================================== -->
+  <div class="navigation-banner" id="navigation-banner">
+    <div class="nav-direction-icon">➤</div>
+    <div class="nav-details">
+      <div class="nav-target-name" id="nav-target-name">Target Gedung</div>
+      <div class="nav-metrics" id="nav-metrics">Jarak: ~350 m • Estimasi: 5 Menit Jalan Kaki</div>
+    </div>
+    <button class="nav-stop-btn" onclick="window.app.stopNavigation()">Batalkan</button>
+  </div>
+
+  <!-- ========================================================================
+       GPS STATUS TOAST NOTIFICATION
+       ======================================================================== -->
+  <div class="gps-status-toast" id="gps-status-toast">
+    <div class="gps-dot"></div>
+    <div>
+      <div class="gps-text-title" id="gps-status-title">Google GPS: Menghubungkan...</div>
+      <div class="gps-text-sub" id="gps-status-coords">Mendeteksi satelit lokasi...</div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       4. INTERACTIVE MAP VIEWPORT (DENAH RESMI KAMPUS UM DENGAN PAN & ZOOM)
+       ======================================================================== -->
+  <main id="map-viewport" role="application" aria-label="Peta Interaktif Denah Kampus 1 Universitas Negeri Malang">
+    <div id="map-world">
+      <img id="campus-map-image" src="DENAH-UM-UTBK-2025-1024x820.jpg" alt="Denah Resmi Kampus I UM" draggable="false">
+      <svg id="route-svg" viewBox="0 0 1024 820"></svg>
+      <div id="player-gps-halo" class="player-gps-halo" style="display: none;"></div>
+      <div id="markers-layer"></div>
+    </div>
+
+    <!-- Floating Zoom & Camera Controls (Pojok Kiri Bawah) -->
+    <div class="map-floating-controls">
+      <button class="map-control-btn" id="btn-zoom-in" title="Perbesar Peta (Zoom In)">+</button>
+      <button class="map-control-btn" id="btn-zoom-out" title="Perkecil Peta (Zoom Out)">−</button>
+      <button class="map-control-btn" id="btn-zoom-reset" title="Tampilkan Penuh Seluruh Kampus">⟲</button>
+      <button class="map-control-btn" id="btn-center-rektorat" title="Fokus ke Graha Rektorat">🎯</button>
+      <button class="map-control-btn" id="btn-locate-me" title="Pusatkan ke Lokasi Saya (GPS)">📍</button>
+    </div>
+  </main>
+
+  <!-- ========================================================================
+       5. BATTLE SPELLS & QUICK PING HUD (BOTTOM-RIGHT)
+       ======================================================================== -->
+  <div class="battle-spells-hud">
+    <!-- Ping Wheel Trigger -->
+    <button class="spell-btn" id="spell-ping" title="Buka Quick Ping Map">
+      <span class="spell-icon">📍</span>
+      <span class="spell-label">PING</span>
+    </button>
+
+    <!-- Sprint / Full Campus Map Reset -->
+    <button class="spell-btn" id="spell-sprint" title="Mode Jelajah Cepat">
+      <span class="spell-icon">⚡</span>
+      <span class="spell-label">SPRINT</span>
+    </button>
+
+    <!-- Recall Spell (Teleport to Gerbang Semarang Base) -->
+    <button class="spell-btn" id="spell-recall" title="Recall ke Gerbang Utama UM">
+      <span class="spell-icon">🌀</span>
+      <span class="spell-label">RECALL</span>
+    </button>
+  </div>
+
+  <!-- ========================================================================
+       6. ROLE / CATEGORY FILTER HUD (BOTTOM-CENTER)
+       ======================================================================== -->
+  <nav class="category-filter-hud" id="category-filter-hud" aria-label="Filter Kategori Landmark"></nav>
+
+  <!-- ========================================================================
+       7. MLBB QUICK PING WHEEL MODAL
+       ======================================================================== -->
+  <div class="ping-wheel-overlay" id="ping-wheel-overlay">
+    <div class="ping-wheel-menu">
+      <div class="ping-wheel-center" id="ping-wheel-center" title="Tutup Ping Wheel">
+        <span>TUTUP</span>
+      </div>
+
+      <!-- 6 Quick Ping Nodes -->
+      <button class="ping-wheel-node pnode-1" data-action="kelas" title="Cari Ruang Kelas & GKB">
+        <span class="node-icon">🏢</span>
+        <span class="node-text">KELAS</span>
+      </button>
+
+      <button class="ping-wheel-node pnode-2" data-action="perpus" title="Spot Nugas & Perpustakaan">
+        <span class="node-icon">📖</span>
+        <span class="node-text">PERPUS</span>
+      </button>
+
+      <button class="ping-wheel-node pnode-3" data-action="makan" title="Cari Makanan & Kantin">
+        <span class="node-icon">🍗</span>
+        <span class="node-text">KANTIN</span>
+      </button>
+
+      <button class="ping-wheel-node pnode-4" data-action="masjid" title="Ibadah / Masjid Al-Hikmah">
+        <span class="node-icon">🕌</span>
+        <span class="node-text">MASJID</span>
+      </button>
+
+      <button class="ping-wheel-node pnode-5" data-action="medis" title="Poliklinik Kesehatan / FK">
+        <span class="node-icon">💊</span>
+        <span class="node-text">MEDIS</span>
+      </button>
+
+      <button class="ping-wheel-node pnode-6" data-action="gerbang" title="Gerbang Keluar / Masuk">
+        <span class="node-icon">🚪</span>
+        <span class="node-text">GERBANG</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       8. LANDMARK DETAILS DRAWER (HERO STATS STYLE)
+       ======================================================================== -->
+  <aside class="landmark-drawer" id="landmark-drawer" aria-label="Detail Landmark Gedung">
+    <div class="drawer-drag-handle" onclick="window.app.closeDrawer()"></div>
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <div class="drawer-title-group">
+          <div class="drawer-badge-row">
+            <span class="drawer-code-badge" id="drawer-code">GKB-A19</span>
+            <span class="drawer-lane-badge" id="drawer-lane">Mid Lane</span>
+          </div>
+          <h2 class="drawer-name" id="drawer-name">Nama Gedung</h2>
+          <p class="drawer-alias" id="drawer-alias">Alias Gedung</p>
+        </div>
+        <button class="drawer-close-btn" onclick="window.app.closeDrawer()" title="Tutup Detail">✕</button>
+      </div>
+
+      <div class="drawer-media-grid">
+        <div class="drawer-image-box">
+          <img id="drawer-image" src="" alt="Foto Gedung">
+          <div class="image-role-tag" id="drawer-role-tag">ROLE: Citadel of Knowledge</div>
+        </div>
+
+        <div class="drawer-stats-box">
+          <div class="stat-row">
+            <div class="stat-header">
+              <span class="stat-name">Sinyal Wi-Fi Eduroam</span>
+              <span class="stat-val">95% (High Speed)</span>
+            </div>
+            <div class="stat-bar-track"><div class="stat-bar-value" style="width: 95%;"></div></div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-header">
+              <span class="stat-name">Ketersediaan Stopkontak</span>
+              <span class="stat-val">⭐⭐⭐⭐⭐</span>
+            </div>
+            <div class="stat-bar-track"><div class="stat-bar-value" style="width: 88%;"></div></div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-header">
+              <span class="stat-name">Kesejukan AC Sentral</span>
+              <span class="stat-val">100% (Sangat Dingin)</span>
+            </div>
+            <div class="stat-bar-track"><div class="stat-bar-value" style="width: 100%;"></div></div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-header">
+              <span class="stat-name">Tingkat Lantai</span>
+              <span class="stat-val" id="drawer-floors">10 Lantai</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Maba Survival Tips (Peringatan & Tips Khusus Maba) -->
+      <div class="maba-survival-box">
+        <div class="survival-title">
+          <span>⚠️</span> <span>TIPS SURVIVAL MAHASISWA BARU</span>
+        </div>
+        <p class="survival-desc" id="drawer-maba-tips">Tips khusus untuk Sobri Si Kodri agar tidak tersesat di kampus.</p>
+      </div>
+
+      <!-- Deskripsi Umum -->
+      <p style="font-size: 13px; line-height: 1.6; color: var(--text-muted); margin-bottom: 14px;" id="drawer-description">Deskripsi lengkap mengenai gedung.</p>
+
+      <!-- Fasilitas List -->
+      <div class="facility-chips-wrap" id="drawer-facilities"></div>
+
+      <!-- Action Buttons -->
+      <div class="drawer-actions-row">
+        <button class="btn-game-primary" onclick="window.app.setWaypointToTarget()">
+          <span>🚀</span> <span>MULAI NAVIGASI (WAYPOINT)</span>
+        </button>
+        <button class="btn-game-secondary" id="drawer-btn-gmaps" title="Buka Rute di Google Maps Aplikasi Eksternal">
+          <span>🌐</span> <span>GOOGLE MAPS</span>
+        </button>
+        <button class="btn-game-secondary" id="drawer-btn-quest" style="display: none;">
+          <span>🎁</span> <span>KLAIM MISI</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================================================
+       9. MABA QUEST LOG MODAL (RPG MISSIONS)
+       ======================================================================== -->
+  <div class="quest-modal-overlay" id="quest-modal">
+    <div class="quest-modal-box">
+      <div class="quest-modal-header">
+        <div class="quest-modal-title">⚔️ MABA SURVIVAL QUESTS - SOBRI SI KODRI</div>
+        <button class="drawer-close-btn" id="quest-modal-close" style="width: 30px; height: 30px;">✕</button>
+      </div>
+      <div class="quest-modal-body" id="quest-list-body"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       DENAH RESMI KAMPUS UM MODAL
+       ======================================================================== -->
+  <div class="quest-modal-overlay" id="denah-modal">
+    <div class="quest-modal-box" style="max-width: 880px;">
+      <div class="quest-modal-header">
+        <div class="quest-modal-title">🗺️ DENAH RESMI KAMPUS I UM (UTBK)</div>
+        <button class="drawer-close-btn" id="denah-modal-close" style="width: 30px; height: 30px;">✕</button>
+      </div>
+      <div class="quest-modal-body" style="padding: 10px; text-align: center; max-height: 75vh; overflow: auto;">
+        <img src="DENAH-UM-UTBK-2025-1024x820.jpg" alt="Denah Resmi Kampus UM" style="max-width: 100%; height: auto; border-radius: 8px; border: 1.5px solid var(--ml-blue-neon); box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);">
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       10. RECALL TELEPORT ANIMATION EFFECT (FULLSCREEN)
+       ======================================================================== -->
+  <div class="recall-fx-overlay" id="recall-overlay">
+    <div class="recall-circle-portal">
+      <div class="recall-text">RECALLING...</div>
+    </div>
+  </div>
+
+  <!-- Zero External Dependencies - Works 100% Offline Immediately -->
+  <script src="data.js"></script>
+  <script src="audio.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
